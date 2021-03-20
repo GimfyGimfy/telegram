@@ -10,15 +10,13 @@ import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardButto
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
+import sql.PostgreSQL;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BotVeronika extends TelegramLongPollingBot {
-    /**
-     * Метод для приема сообщений.
-     * @param update Содержит сообщение от пользователя.
-     */
+
     @Override
     public void onUpdateReceived(Update update) {
         String message = update.getMessage().getText();
@@ -26,23 +24,26 @@ public class BotVeronika extends TelegramLongPollingBot {
             SendMessage sendMessage = new SendMessage();
             sendMessage.setChatId( update.getMessage().getChatId());
             sendMsg("Здравствуйте, " + update.getMessage().getFrom().getFirstName() + "!", update.getMessage().getChatId());
-            sendMessage.setReplyMarkup(getAboutUsReplyKeyboard());
         }
         if(message.equals("/help")) {
-
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(update.getMessage().getChatId());
+            sendMessage.setText("Команды для работы с ботом: /help - список команд; /start - начало работы с ботом");
+        }
+        if(message.equals("/news")) {
             SendMessage sendMessage = new SendMessage();
             sendMessage.setChatId( update.getMessage().getChatId());
-            sendMessage.setText("Команды для работы с ботом: /help - список команд; /start - начало работы с ботом");
+            sendMessage.setText("Функции:");
+            sendMessage.setReplyMarkup(getAboutUsReplyKeyboard());
             try {
                 execute(sendMessage);
             } catch (TelegramApiException e) {
                 System.out.println("Exception: " + e.toString());
             }
         }
-        //else{
-        //sendMsg(update.getMessage().getText(), update.getMessage().getChatId());
-        //}
     }
+
+    PostgreSQL comSQL = new PostgreSQL();
 
     public ReplyKeyboard getAboutUsReplyKeyboard() {
         final ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -52,13 +53,9 @@ public class BotVeronika extends TelegramLongPollingBot {
         List<KeyboardRow> keyboardRows = new ArrayList<>();
         KeyboardRow keyboardRowOne = new KeyboardRow();
         KeyboardRow keyboardRowTwo = new KeyboardRow();
-        KeyboardRow keyboardRowThree = new KeyboardRow();
-        keyboardRowOne.add(new KeyboardButton("Преподаватели"));
-        keyboardRowOne.add(new KeyboardButton("Отзывы"));
-        keyboardRowTwo.add(new KeyboardButton("Результаты"));
-        keyboardRowTwo.add(new KeyboardButton("Программа"));
-        keyboardRowThree.add(new KeyboardButton("Главное меню"));
-        keyboardRows.add(keyboardRowThree);
+        keyboardRowOne.add(new KeyboardButton("Футбол"));
+        keyboardRowOne.add(new KeyboardButton("Хоккей"));
+        keyboardRowTwo.add(new KeyboardButton("Мировые новости"));
         keyboardRows.add(keyboardRowOne);
         keyboardRows.add(keyboardRowTwo);
         replyKeyboardMarkup.setKeyboard(keyboardRows);

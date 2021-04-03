@@ -1,7 +1,7 @@
 package sqlRequest;
 
 public class Request {
-        public static final String INSERT_INTO_USERS = "INSERT INTO users (Id, Firstname, Lastname) values('%s','%s', '%s', '%s');";
+        public static final String INSERT_INTO_USERS = "INSERT INTO users (Id, Firstname, Lastname) values('%s','%s', '%s');";
         public static final String UPDATE_ROLE = "UPDATE users SET Role = '%s' WHERE id = %s;";
         public static final String SET_TYPE_OF_MSG = "UPDATE users SET type = '%s' WHERE id = %s;";
         public static final String SET_LAST_ID = "UPDATE users SET lastid = '%s' WHERE id = %s;";

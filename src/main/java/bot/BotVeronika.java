@@ -21,26 +21,26 @@ public class BotVeronika extends TelegramLongPollingBot {
     @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
-        int id = update.getMessage().getChatId().intValue();
-        String firstname = update.getMessage().getFrom().getFirstName();
-        String lastname = update.getMessage().getFrom().getLastName();
 
         String message = update.getMessage().getText();
         if(message.equals("/start")) {
+            comSQL.deleteData(update.getMessage().getChatId().intValue());
+            sendMessage("Здравствуйте, " + update.getMessage().getFrom().getFirstName() + "!", update.getMessage().getChatId());
             SendMessage sendMessage = new SendMessage();
-            sendMessage.setChatId( update.getMessage().getChatId());
-            sendMsg("Здравствуйте, " + update.getMessage().getFrom().getFirstName() + "!", update.getMessage().getChatId());
+            sendMessage.setReplyMarkup(getSignUpToTrialInlineMarkup());
         }
         if(message.equals("/help")) {
-            comSQL.insertData(id, firstname, lastname);
-            SendMessage sendMessage = new SendMessage();
-            sendMessage.setChatId(update.getMessage().getChatId());
-            sendMsg("Команды для работы с ботом: /help - список команд; /start - начало работы с ботом", update.getMessage().getChatId());
+            comSQL.insertData(update.getMessage().getChatId().intValue(), update.getMessage().getFrom().getFirstName(), update.getMessage().getFrom().getLastName());
+            comSQL.updateData(update.getMessage().getChatId().intValue(), "Student");
+            sendMessage("Команды для работы с ботом: /help - список команд; /start - начало работы с ботом", update.getMessage().getChatId());
+        }
+        if (message.equals("/admin")) {
+            comSQL.updateData(update.getMessage().getChatId().intValue(), "Teacher");
         }
         if(message.equals("/news")) {
             SendMessage sendMessage = new SendMessage();
             sendMessage.setChatId( update.getMessage().getChatId());
-            sendMsg("Функции:", update.getMessage().getChatId());;
+            sendMessage("Функции:", update.getMessage().getChatId());;
             sendMessage.setReplyMarkup(getAboutUsReplyKeyboard());
             try {
                 execute(sendMessage);
@@ -49,6 +49,7 @@ public class BotVeronika extends TelegramLongPollingBot {
             }
         }
     }
+
 
     telegram.sql.PostgreSQLJDBC comSQL = new PostgreSQLJDBC();
 
@@ -71,7 +72,7 @@ public class BotVeronika extends TelegramLongPollingBot {
 
     public InlineKeyboardMarkup getSignUpToTrialInlineMarkup() {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-        InlineKeyboardButton buttonSignUp = new InlineKeyboardButton().setText("Записаться на пробное занятие");
+        InlineKeyboardButton buttonSignUp = new InlineKeyboardButton().setText("Команды");
         buttonSignUp.setCallbackData("signUpToTrial");
         List<InlineKeyboardButton> firstKeyboardButtonRow = new ArrayList<>();
         firstKeyboardButtonRow.add(buttonSignUp);
@@ -81,7 +82,7 @@ public class BotVeronika extends TelegramLongPollingBot {
         return inlineKeyboardMarkup;
     }
 
-    public synchronized void sendMsg(String s, long chat_id) {
+    public synchronized void sendMessage(String s, long chat_id) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chat_id);
         sendMessage.setText(s);

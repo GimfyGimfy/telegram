@@ -1,5 +1,6 @@
 package bot;
 
+import lombok.SneakyThrows;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -10,15 +11,20 @@ import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardButto
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
-import sql.PostgreSQL;
+import telegram.sql.PostgreSQLJDBC;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BotVeronika extends TelegramLongPollingBot {
 
+    @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
+        int id = update.getMessage().getChatId().intValue();
+        String firstname = update.getMessage().getFrom().getFirstName();
+        String lastname = update.getMessage().getFrom().getLastName();
+
         String message = update.getMessage().getText();
         if(message.equals("/start")) {
             SendMessage sendMessage = new SendMessage();
@@ -26,14 +32,15 @@ public class BotVeronika extends TelegramLongPollingBot {
             sendMsg("Здравствуйте, " + update.getMessage().getFrom().getFirstName() + "!", update.getMessage().getChatId());
         }
         if(message.equals("/help")) {
+            comSQL.insertData(id, firstname, lastname);
             SendMessage sendMessage = new SendMessage();
             sendMessage.setChatId(update.getMessage().getChatId());
-            sendMessage.setText("Команды для работы с ботом: /help - список команд; /start - начало работы с ботом");
+            sendMsg("Команды для работы с ботом: /help - список команд; /start - начало работы с ботом", update.getMessage().getChatId());
         }
         if(message.equals("/news")) {
             SendMessage sendMessage = new SendMessage();
             sendMessage.setChatId( update.getMessage().getChatId());
-            sendMessage.setText("Функции:");
+            sendMsg("Функции:", update.getMessage().getChatId());;
             sendMessage.setReplyMarkup(getAboutUsReplyKeyboard());
             try {
                 execute(sendMessage);
@@ -43,7 +50,7 @@ public class BotVeronika extends TelegramLongPollingBot {
         }
     }
 
-    PostgreSQL comSQL = new PostgreSQL();
+    telegram.sql.PostgreSQLJDBC comSQL = new PostgreSQLJDBC();
 
     public ReplyKeyboard getAboutUsReplyKeyboard() {
         final ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -74,14 +81,14 @@ public class BotVeronika extends TelegramLongPollingBot {
         return inlineKeyboardMarkup;
     }
 
-    public synchronized void sendMsg(String s, Long chat_id) {
+    public synchronized void sendMsg(String s, long chat_id) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chat_id);
         sendMessage.setText(s);
         try {
             execute(sendMessage);
         } catch (TelegramApiException e) {
-            System.out.println("Exception: " + e.toString());
+            //log.info( "Exception: " + e.toString());
         }
     }
 
